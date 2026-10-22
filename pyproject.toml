@@ -1,0 +1,15 @@
+[project]
+name = "search"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "anthropic>=2.1.0",
+    "datasets>=5.1.0",
+    "numpy>=2.4.6",
+    "pandas>=3.0.6",
+    "python-dotenv>=1.2.4",
+    "rank-bm25>=0.2.2",
+    "sentence-transformers>=6.2.0",
+]

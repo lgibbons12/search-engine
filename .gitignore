@@ -1,0 +1,19 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Generated data
+data-with-text.csv
+embeddings.npy
+data-subset.csv
+
+# Sensitive data
+.env
+labels.json

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="450" height="224" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="15">
+<rect width="450" height="224" fill="#ffffff"/>
+<text x="20" y="36" text-anchor="start" font-weight="600" font-size="17" fill="#1f2328">BM25 vs embeddings vs RRF</text>
+<text x="20" y="56" text-anchor="start" font-weight="normal" font-size="13" fill="#656d76">Mean over 10 queries</text>
+<text x="20" y="83.4" text-anchor="start" font-weight="600" font-size="15" fill="#656d76">Method</text>
+<text x="290" y="83.4" text-anchor="end" font-weight="600" font-size="15" fill="#656d76">recall@10</text>
+<text x="420" y="83.4" text-anchor="end" font-weight="600" font-size="15" fill="#656d76">ndcg@10</text>
+<line x1="20" x2="430" y1="96" y2="96" stroke="#d0d7de"/>
+<text x="20" y="119.4" text-anchor="start" font-weight="normal" font-size="15" fill="#1f2328">BM25</text>
+<text x="290" y="119.4" text-anchor="end" font-weight="normal" font-size="15" fill="#1f2328">0.575</text>
+<text x="420" y="119.4" text-anchor="end" font-weight="normal" font-size="15" fill="#1f2328">0.692</text>
+<line x1="20" x2="430" y1="132" y2="132" stroke="#eaeef2"/>
+<text x="20" y="155.4" text-anchor="start" font-weight="normal" font-size="15" fill="#1f2328">Embeddings</text>
+<text x="290" y="155.4" text-anchor="end" font-weight="700" font-size="15" fill="#1f2328">0.728</text>
+<text x="420" y="155.4" text-anchor="end" font-weight="700" font-size="15" fill="#1f2328">0.862</text>
+<line x1="20" x2="430" y1="168" y2="168" stroke="#eaeef2"/>
+<text x="20" y="191.4" text-anchor="start" font-weight="normal" font-size="15" fill="#1f2328">RRF</text>
+<text x="290" y="191.4" text-anchor="end" font-weight="normal" font-size="15" fill="#1f2328">0.695</text>
+<text x="420" y="191.4" text-anchor="end" font-weight="normal" font-size="15" fill="#1f2328">0.852</text>
+<line x1="20" x2="430" y1="204" y2="204" stroke="#eaeef2"/>
+</svg>
