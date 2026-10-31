@@ -1,0 +1,4 @@
+.venv/
+coding-challenge/
+__pycache__/
+.pytest_cache/
