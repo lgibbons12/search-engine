@@ -1,0 +1,231 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="1010" viewBox="0 0 1500 1010">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#57606A"/>
+    </marker>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#C23B3B"/>
+    </marker>
+    <marker id="ap" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7A4FD3"/>
+    </marker>
+    <style>
+      text { font-family: system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: #1F2328; }
+      .h1 { font-size: 26px; font-weight: 700; }
+      .sub { font-size: 14px; fill: #57606A; }
+      .b { font-size: 14px; font-weight: 700; }
+      .t { font-size: 12.5px; }
+      .mute { font-size: 12px; fill: #57606A; }
+      .m { font-family: Consolas, Menlo, "Courier New", monospace; font-size: 12px; }
+      .flag { font-family: Consolas, Menlo, "Courier New", monospace; font-size: 12.5px; font-weight: 700; }
+      .desc { font-size: 11.5px; fill: #57606A; }
+      .arrow { stroke: #57606A; stroke-width: 1.6; fill: none; marker-end: url(#a); }
+      .card { fill: #FFFFFF; stroke: #D0D7DE; }
+    </style>
+  </defs>
+
+  <rect width="1500" height="1010" fill="#FAFAF7"/>
+  <text x="30" y="44" class="h1">Search pipeline and the cli.py flags that control it</text>
+  <text x="30" y="70" class="sub">python cli.py [flags]. With no flags you get the tuned defaults shown here. Every flag maps to one Config field; sweep.py tunes them all on dev.</text>
+
+  <!-- ===== LLM branch (row A) ===== -->
+  <rect x="220" y="92" width="500" height="126" rx="10" fill="#F4EFFD" stroke="#7A4FD3" stroke-width="1.6"/>
+  <text x="236" y="116" class="b" style="fill:#5B32B0">LLM query understanding</text>
+  <text x="420" y="116" class="mute">query_parse.py</text>
+  <text x="236" y="138" class="t">claude-opus-5-5 (low effort) fills a pydantic QueryParse:</text>
+  <text x="236" y="157" class="m" style="fill:#5B32B0">{brands, colors, excluded_terms}</text>
+  <text x="236" y="177" class="mute">"not pink" → excluded ["pink"]; album/slogan titles and "X free" are not exclusions</text>
+  <text x="236" y="196" class="mute">cached in data/query_parses.json · live call ≈ 1.8 s median, 3.4 s p90</text>
+  <rect x="236" y="201" width="0" height="0"/>
+  <rect x="540" y="98" width="172" height="26" rx="13" fill="#7A4FD3"/>
+  <text x="626" y="116" class="flag" style="fill:#FFFFFF;text-anchor:middle">--llm off|soft|hard</text>
+
+  <!-- query to LLM -->
+  <path d="M105,315 L105,155 L217,155" class="arrow"/>
+
+  <!-- hard: LLM to retrieval -->
+  <path d="M300,219 L300,257" stroke="#C23B3B" stroke-width="1.8" stroke-dasharray="6 4" fill="none" marker-end="url(#ar)"/>
+  <text x="310" y="244" class="t" style="fill:#C23B3B;font-weight:700">--llm hard: mask search space before retrieval</text>
+
+  <!-- soft: LLM to soft boosts -->
+  <path d="M721,155 L1120,155 L1120,297" stroke="#7A4FD3" stroke-width="1.8" fill="none" marker-end="url(#ap)"/>
+  <text x="740" y="146" class="t" style="fill:#5B32B0;font-weight:700">--llm soft: brand / color / excluded match vectors → score boosts</text>
+
+  <!-- ===== main row (row B) ===== -->
+  <!-- Query -->
+  <rect x="30" y="315" width="150" height="105" rx="10" fill="#FFFFFF" stroke="#8C959F"/>
+  <text x="44" y="340" class="b">query</text>
+  <text x="44" y="362" class="m">"nike running</text>
+  <text x="44" y="378" class="m"> shoes women</text>
+  <text x="44" y="394" class="m"> not pink"</text>
+
+  <!-- BM25 -->
+  <rect x="220" y="260" width="260" height="100" rx="10" fill="#EEF4FE" stroke="#2F6FDE" stroke-width="1.6"/>
+  <text x="234" y="284" class="b" style="fill:#1E4FB0">Field BM25</text>
+  <text x="320" y="284" class="mute">bm25.py</text>
+  <text x="234" y="305" class="t">3 sparse indexes: title, brand, bullets</text>
+  <text x="234" y="324" class="m">Σ w_f · BM25_f(q, d)</text>
+  <text x="234" y="345" class="mute">precomputed weights · ≈ 1 ms</text>
+
+  <!-- Dense -->
+  <rect x="220" y="375" width="260" height="100" rx="10" fill="#EEF4FE" stroke="#2F6FDE" stroke-width="1.6"/>
+  <text x="234" y="399" class="b" style="fill:#1E4FB0">Dense</text>
+  <text x="285" y="399" class="mute">embeddings.py</text>
+  <text x="234" y="420" class="t">bge-small-en-v1.5, 384-d, normalized</text>
+  <text x="234" y="439" class="m">cos(q, d) = E @ q</text>
+  <text x="234" y="460" class="mute">query prefix only · ≈ 15 ms encode</text>
+
+  <path d="M181,360 L217,312" class="arrow"/>
+  <path d="M181,378 L217,424" class="arrow"/>
+
+  <!-- Fusion -->
+  <rect x="520" y="300" width="200" height="135" rx="10" fill="#EAF6F6" stroke="#1F8A8A" stroke-width="1.6"/>
+  <text x="534" y="324" class="b" style="fill:#16696A">Weighted RRF</text>
+  <text x="640" y="324" class="mute">hybrid.py</text>
+  <text x="534" y="348" class="m">1/(rrf_k + r_bm25)</text>
+  <text x="534" y="366" class="m">+ w_dense/(rrf_k + r_dense)</text>
+  <text x="534" y="390" class="t">top `depth` from each list</text>
+  <text x="534" y="410" class="t">→ top 100 fused rows</text>
+  <path d="M481,310 L517,350" class="arrow"/>
+  <path d="M481,425 L517,385" class="arrow"/>
+
+  <!-- CE -->
+  <rect x="760" y="300" width="220" height="135" rx="10" fill="#EDF8F1" stroke="#1E7A46" stroke-width="1.6"/>
+  <text x="774" y="324" class="b" style="fill:#1E7A46">Cross-encoder rerank</text>
+  <text x="774" y="342" class="mute">rerank.py</text>
+  <text x="774" y="364" class="t">ms-marco-MiniLM-L-6-v2</text>
+  <text x="774" y="383" class="t">scores (query, title) pairs</text>
+  <text x="774" y="402" class="t">reorders top 50 only</text>
+  <text x="774" y="421" class="mute">≈ 200 ms on CPU</text>
+  <path d="M721,367 L757,367" class="arrow"/>
+
+  <!-- Soft -->
+  <rect x="1020" y="300" width="200" height="135" rx="10" fill="#F4EFFD" stroke="#7A4FD3" stroke-width="1.6"/>
+  <text x="1034" y="324" class="b" style="fill:#5B32B0">Soft LLM boosts</text>
+  <text x="1034" y="342" class="mute">llm_boost.py</text>
+  <text x="1034" y="364" class="m">CE + b_brand·brand</text>
+  <text x="1034" y="382" class="m">   + b_color·color</text>
+  <text x="1034" y="400" class="m">   − p_excl·excluded</text>
+  <text x="1034" y="421" class="mute">over the reranked head</text>
+  <path d="M981,367 L1017,367" class="arrow"/>
+
+  <!-- Results -->
+  <rect x="1260" y="300" width="210" height="135" rx="10" fill="#FFF8EC" stroke="#C77700" stroke-width="1.6"/>
+  <text x="1274" y="324" class="b" style="fill:#9A5B00">Top k product_ids</text>
+  <text x="1274" y="342" class="mute">search(query, k)</text>
+  <text x="1274" y="364" class="t">1–50: reranked + boosted</text>
+  <text x="1274" y="383" class="t">51–100: fused order</text>
+  <text x="1274" y="402" class="t">→ eval.py: nDCG@10,</text>
+  <text x="1274" y="421" class="t">   Exact-recall@100, MRR</text>
+  <path d="M1221,367 L1257,367" class="arrow"/>
+
+  <!-- ===== flag cards (row C) ===== -->
+  <text x="30" y="508" class="b" style="font-size:16px">Flags  ·  default  ·  what it does</text>
+
+  <!-- Retrieval card -->
+  <rect x="220" y="522" width="260" height="342" rx="8" class="card"/>
+  <text x="234" y="544" class="b" style="font-size:13px;fill:#1E4FB0">Retrieval</text>
+  <text x="234" y="570" class="flag">--[no-]use-bm25  on</text>
+  <text x="234" y="585" class="desc">include the BM25 list in fusion</text>
+  <text x="234" y="607" class="flag">--w-title 1.0</text>
+  <text x="234" y="622" class="desc">title field weight (the anchor)</text>
+  <text x="234" y="644" class="flag">--w-brand 0.25</text>
+  <text x="234" y="659" class="desc">brand field; above 0.5 double-counts</text>
+  <text x="234" y="681" class="flag">--w-bullets 0.0</text>
+  <text x="234" y="696" class="desc">bullets field; any weight hurt on dev</text>
+  <text x="234" y="718" class="flag">--k1 1.2   --b 0.75</text>
+  <text x="234" y="733" class="desc">BM25 tf saturation / length normalization</text>
+  <text x="234" y="755" class="flag">--[no-]dense  on</text>
+  <text x="234" y="770" class="desc">include the bge-small cosine list</text>
+  <text x="234" y="792" class="flag">--w-dense 1.0</text>
+  <text x="234" y="807" class="desc">dense list's RRF weight (BM25 = 1)</text>
+  <text x="234" y="834" class="desc" style="fill:#C23B3B">--llm hard sets masked products to −inf</text>
+  <text x="234" y="849" class="desc" style="fill:#C23B3B">in both lists before top-k</text>
+
+  <!-- Fusion card -->
+  <rect x="520" y="522" width="200" height="200" rx="8" class="card"/>
+  <text x="534" y="544" class="b" style="font-size:13px;fill:#16696A">Fusion</text>
+  <text x="534" y="570" class="flag">--rrf-k 10</text>
+  <text x="534" y="585" class="desc">small k: top ranks dominate;</text>
+  <text x="534" y="600" class="desc">large k: flatter, rank-agnostic</text>
+  <text x="534" y="622" class="flag">--depth 100</text>
+  <text x="534" y="637" class="desc">candidates taken per retriever</text>
+  <text x="534" y="659" class="desc">tuned on dev: fusing is the gain,</text>
+  <text x="534" y="674" class="desc">w_dense 0.75–1.5 all ≈ equal</text>
+  <text x="534" y="700" class="desc">+5 pts recall@100 on test</text>
+
+  <!-- CE card -->
+  <rect x="760" y="522" width="220" height="250" rx="8" class="card"/>
+  <text x="774" y="544" class="b" style="font-size:13px;fill:#1E7A46">Rerank</text>
+  <text x="774" y="570" class="flag">--[no-]rerank  on</text>
+  <text x="774" y="585" class="desc">off = return fused order as-is</text>
+  <text x="774" y="607" class="flag">--rerank-depth 50</text>
+  <text x="774" y="622" class="desc">how many get CE-scored; the</text>
+  <text x="774" y="637" class="desc">rest keep fused order (recall same)</text>
+  <text x="774" y="659" class="flag">--ce-text title</text>
+  <text x="774" y="674" class="desc">title | brand+title |</text>
+  <text x="774" y="689" class="desc">brand+title+bullets (all ≈ equal)</text>
+  <text x="774" y="711" class="flag">--w-ce inf</text>
+  <text x="774" y="726" class="desc">inf = pure CE order; finite = RRF</text>
+  <text x="774" y="741" class="desc">blend with fused rank (always worse)</text>
+  <text x="774" y="762" class="desc">+4.8 nDCG@10 on test</text>
+
+  <!-- Soft card -->
+  <rect x="1020" y="522" width="200" height="250" rx="8" class="card"/>
+  <text x="1034" y="544" class="b" style="font-size:13px;fill:#5B32B0">LLM boosts</text>
+  <text x="1034" y="570" class="flag">--llm soft</text>
+  <text x="1034" y="585" class="desc">needs --rerank (adds to CE score)</text>
+  <text x="1034" y="607" class="flag">--b-brand 1.0</text>
+  <text x="1034" y="622" class="desc">+ if brand in brand/title field</text>
+  <text x="1034" y="644" class="flag">--b-color 2.0</text>
+  <text x="1034" y="659" class="desc">+ if color in color/title field</text>
+  <text x="1034" y="681" class="flag">--p-excl 4.0</text>
+  <text x="1034" y="696" class="desc">− if title/color has excluded</text>
+  <text x="1034" y="711" class="desc">term, unless title negates it</text>
+  <text x="1034" y="726" class="desc">("Syringe Without Needle")</text>
+  <text x="1034" y="748" class="desc">48/150 dev queries have signal</text>
+  <text x="1034" y="763" class="desc">signal subset 0.503 → 0.525</text>
+
+  <!-- Run card -->
+  <rect x="1260" y="522" width="210" height="200" rx="8" class="card"/>
+  <text x="1274" y="544" class="b" style="font-size:13px;fill:#9A5B00">Run</text>
+  <text x="1274" y="570" class="flag">--split dev|test|all</text>
+  <text x="1274" y="585" class="desc">evaluate() → results.log line</text>
+  <text x="1274" y="607" class="flag">--query "…"  --k 10</text>
+  <text x="1274" y="622" class="desc">print top-k titles instead</text>
+  <text x="1274" y="644" class="flag">--name cli</text>
+  <text x="1274" y="659" class="desc">results.log prefix; tag lists</text>
+  <text x="1274" y="674" class="desc">only non-default flags</text>
+  <text x="1274" y="700" class="desc">invalid combos fail fast</text>
+
+  <!-- Query card (LLM flag) -->
+  <rect x="30" y="522" width="150" height="200" rx="8" class="card"/>
+  <text x="44" y="544" class="b" style="font-size:13px;fill:#5B32B0">LLM mode</text>
+  <text x="44" y="570" class="flag">--llm soft</text>
+  <text x="44" y="585" class="desc">default (rule 3)</text>
+  <text x="44" y="607" class="flag">--llm hard</text>
+  <text x="44" y="622" class="desc">pre-filter; test</text>
+  <text x="44" y="637" class="desc">recall −6 pts,</text>
+  <text x="44" y="652" class="desc">nDCG −1.4 pts</text>
+  <text x="44" y="674" class="flag">--llm off</text>
+  <text x="44" y="689" class="desc">no LLM call at all</text>
+
+  <!-- ===== test results strip (row D) ===== -->
+  <rect x="20" y="890" width="1460" height="100" rx="12" fill="#FFFFFF" stroke="#D0D7DE"/>
+  <text x="40" y="916" class="b">Test nDCG@10 as stages are added (recall@100 in brackets)</text>
+  <rect x="40" y="930" width="190" height="40" rx="8" fill="#EEF4FE"/>
+  <text x="135" y="955" class="t" style="text-anchor:middle"><tspan font-weight="700">BM25</tspan>  0.403 (0.747)</text>
+  <text x="243" y="955" class="b" style="fill:#57606A">→</text>
+  <rect x="265" y="930" width="200" height="40" rx="8" fill="#EAF6F6"/>
+  <text x="365" y="955" class="t" style="text-anchor:middle"><tspan font-weight="700">+dense</tspan>  0.440 (0.798)</text>
+  <text x="478" y="955" class="b" style="fill:#57606A">→</text>
+  <rect x="500" y="930" width="190" height="40" rx="8" fill="#EDF8F1"/>
+  <text x="595" y="955" class="t" style="text-anchor:middle"><tspan font-weight="700">+CE</tspan>  0.488 (0.798)</text>
+  <text x="703" y="955" class="b" style="fill:#57606A">→</text>
+  <rect x="725" y="930" width="200" height="40" rx="8" fill="#F4EFFD" stroke="#7A4FD3"/>
+  <text x="825" y="955" class="t" style="text-anchor:middle"><tspan font-weight="700">+soft LLM</tspan>  0.491 (0.798)</text>
+  <rect x="960" y="930" width="230" height="40" rx="8" fill="#FBEAEA" stroke="#C23B3B" stroke-dasharray="5 3"/>
+  <text x="1075" y="955" class="t" style="text-anchor:middle"><tspan font-weight="700">hard instead</tspan>  0.474 (0.736)</text>
+  <text x="1210" y="946" class="desc">sweep.py: tune every flag on dev,</text>
+  <text x="1210" y="962" class="desc">winner → sweep_best.json → one test eval</text>
+</svg>

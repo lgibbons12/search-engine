@@ -1,0 +1,20 @@
+{
+ "use_bm25": true,
+ "w_title": 1.0,
+ "w_brand": 0.5,
+ "w_bullets": 0.0,
+ "k1": 0.9,
+ "b": 0.75,
+ "dense": true,
+ "w_dense": 1.0,
+ "rrf_k": 60,
+ "depth": 200,
+ "rerank": true,
+ "rerank_depth": 50,
+ "ce_text": "title",
+ "w_ce": 8.0,
+ "llm": "soft",
+ "b_brand": 1.0,
+ "b_color": 2.0,
+ "p_excl": 2.0
+}

@@ -1,0 +1,14 @@
+{"name": "bm25_fields_equal dev", "n": 150, "ndcg10": 0.4146, "recall100": 0.7606, "mrr": 0.5412, "ms_per_query": 1.3}
+{"name": "bm25_fields_tuned dev {'title': 1.0, 'brand': 0.25, 'bullets': 0.0}", "n": 150, "ndcg10": 0.4468, "recall100": 0.7673, "mrr": 0.5853, "ms_per_query": 0.8}
+{"name": "bm25_fields_tuned test {'title': 1.0, 'brand': 0.25, 'bullets': 0.0}", "n": 150, "ndcg10": 0.4027, "recall100": 0.7467, "mrr": 0.5736, "ms_per_query": 0.8}
+{"name": "dense_bge_small dev", "n": 150, "ndcg10": 0.4579, "recall100": 0.8126, "mrr": 0.6281, "ms_per_query": 16.4}
+{"name": "hybrid_rrf dev w_dense=1.0 rrf_k=10", "n": 150, "ndcg10": 0.4829, "recall100": 0.8351, "mrr": 0.595, "ms_per_query": 39.7}
+{"name": "hybrid_rrf test w_dense=1.0 rrf_k=10", "n": 150, "ndcg10": 0.4397, "recall100": 0.7978, "mrr": 0.5779, "ms_per_query": 60.0}
+{"name": "hybrid+ce_rerank50 dev text=title w_ce=inf", "n": 150, "ndcg10": 0.5649, "recall100": 0.8351, "mrr": 0.6825, "ms_per_query": 201.3}
+{"name": "hybrid+ce_rerank50 test text=title w_ce=inf", "n": 150, "ndcg10": 0.4877, "recall100": 0.7978, "mrr": 0.6233, "ms_per_query": 196.1}
+{"name": "+llm_soft dev brand=1.0 color=2.0 excl=4.0", "n": 150, "ndcg10": 0.5719, "recall100": 0.8351, "mrr": 0.692, "ms_per_query": 177.9}
+{"name": "+llm_soft test brand=1.0 color=2.0 excl=4.0", "n": 150, "ndcg10": 0.4912, "recall100": 0.7978, "mrr": 0.635, "ms_per_query": 202.8}
+{"name": "+llm_hard_prefilter dev", "n": 150, "ndcg10": 0.5473, "recall100": 0.7668, "mrr": 0.6709, "ms_per_query": 191.5}
+{"name": "+llm_hard_prefilter test", "n": 150, "ndcg10": 0.4738, "recall100": 0.7357, "mrr": 0.627, "ms_per_query": 191.5}
+{"name": "sweep_best dev w_brand=0.5 k1=0.9 rrf_k=60 depth=200 w_ce=8.0 p_excl=2.0", "n": 150, "ndcg10": 0.5725, "recall100": 0.8352, "mrr": 0.6862, "ms_per_query": 0.4}
+{"name": "sweep_best test w_brand=0.5 k1=0.9 rrf_k=60 depth=200 w_ce=8.0 p_excl=2.0", "n": 150, "ndcg10": 0.4939, "recall100": 0.7982, "mrr": 0.6355, "ms_per_query": 220.8}

@@ -1,0 +1,7 @@
+.env
+.venv/
+__pycache__/
+models/
+# Large, regenerable: python setup_data.py && python embeddings.py
+data/products.parquet
+data/product_embeddings.npz

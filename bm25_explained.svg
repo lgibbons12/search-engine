@@ -1,0 +1,288 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1495" viewBox="0 0 1200 1495">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#57606A"/>
+    </marker>
+    <style>
+      text { font-family: system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: #1F2328; }
+      .h1 { font-size: 26px; font-weight: 700; }
+      .sub { font-size: 14px; fill: #57606A; }
+      .sec { font-size: 16px; font-weight: 700; }
+      .b { font-size: 14px; font-weight: 700; }
+      .t { font-size: 12.5px; }
+      .m { font-family: Consolas, Menlo, "Courier New", monospace; font-size: 12px; }
+      .mute { font-size: 12px; fill: #57606A; }
+      .cell { font-family: Consolas, Menlo, monospace; font-size: 12px; text-anchor: middle; }
+      .box { fill: #FFFFFF; stroke: #9DB8EC; stroke-width: 1.2; }
+      .arrow { stroke: #57606A; stroke-width: 1.5; fill: none; marker-end: url(#arr); }
+    </style>
+  </defs>
+
+  <rect width="1200" height="1495" fill="#FAFAF7"/>
+
+  <!-- Header -->
+  <text x="40" y="48" class="h1">bm25.py: field-weighted BM25, end to end</text>
+  <text x="40" y="74" class="sub">Three independent BM25 indexes (title, brand, bullets). All BM25 math happens once at build time; a query is just a column-slice + sum.</text>
+
+  <!-- ============ 1. BUILD ============ -->
+  <rect x="20" y="95" width="1160" height="545" rx="14" fill="#F3F7FE" stroke="#C9D8F5"/>
+  <text x="40" y="125" class="sec" style="fill:#1E4FB0">① BUILD, once on first search():  get_bm25() → FieldBM25(df) → FieldIndex(texts) × 3 fields</text>
+
+  <!-- step boxes -->
+  <rect x="40" y="145" width="200" height="120" rx="8" class="box"/>
+  <text x="54" y="170" class="b">products.parquet</text>
+  <text x="54" y="192" class="t">36,984 rows</text>
+  <text x="54" y="210" class="t">FieldBM25.__init__ builds</text>
+  <text x="54" y="228" class="t">one FieldIndex per field:</text>
+  <text x="54" y="246" class="t">title · brand · bullets</text>
+
+  <rect x="270" y="145" width="200" height="120" rx="8" class="box"/>
+  <text x="284" y="170" class="b">tokenize(text)</text>
+  <text x="284" y="192" class="t">lowercase</text>
+  <text x="284" y="210" class="t">regex [a-z0-9]+</text>
+  <text x="284" y="228" class="t">strip plural -s (len &gt; 3)</text>
+  <text x="284" y="246" class="t">keeps -ss: "glass" stays</text>
+
+  <rect x="500" y="145" width="200" height="120" rx="8" class="box"/>
+  <text x="514" y="170" class="b">Term-frequency matrix</text>
+  <text x="514" y="192" class="t">CountVectorizer → CSR</text>
+  <text x="514" y="210" class="t">rows = products</text>
+  <text x="514" y="228" class="t">cols = vocabulary words</text>
+  <text x="514" y="246" class="t">cell = count (sparse)</text>
+
+  <rect x="730" y="145" width="200" height="120" rx="8" class="box"/>
+  <text x="744" y="170" class="b">Corpus statistics</text>
+  <text x="744" y="192" class="t">dl = tokens per product</text>
+  <text x="744" y="210" class="t">avgdl = mean(dl)</text>
+  <text x="744" y="228" class="t">df = # products with word</text>
+  <text x="744" y="246" class="t">idf from n and df</text>
+
+  <rect x="960" y="145" width="200" height="120" rx="8" class="box"/>
+  <text x="974" y="170" class="b">BM25 weight matrix</text>
+  <text x="974" y="192" class="t">each nonzero cell becomes</text>
+  <text x="974" y="210" class="t">its full BM25 score</text>
+  <text x="974" y="228" class="t">.tocsc() → column slices</text>
+  <text x="974" y="246" class="t">are fast at query time</text>
+
+  <line x1="243" y1="205" x2="267" y2="205" class="arrow"/>
+  <line x1="473" y1="205" x2="497" y2="205" class="arrow"/>
+  <line x1="703" y1="205" x2="727" y2="205" class="arrow"/>
+  <line x1="933" y1="205" x2="957" y2="205" class="arrow"/>
+
+  <!-- Example A: tokenize -->
+  <rect x="40" y="290" width="420" height="180" rx="8" fill="#FFFFFF" stroke="#D0D7DE"/>
+  <text x="56" y="314" class="b" style="font-size:13px">Example: title field, 3 products</text>
+  <text x="56" y="346" class="m">p1  Nike Running Shoes</text>
+  <text x="56" y="374" class="m">p2  Running Shoe Laces, Black</text>
+  <text x="56" y="402" class="m">p3  iPhone 12 Case</text>
+  <text x="262" y="346" class="m" style="fill:#57606A">→</text>
+  <text x="262" y="374" class="m" style="fill:#57606A">→</text>
+  <text x="262" y="402" class="m" style="fill:#57606A">→</text>
+  <text x="282" y="346" class="m" style="fill:#1E4FB0">nike running shoe</text>
+  <text x="282" y="374" class="m" style="fill:#1E4FB0">running shoe lace black</text>
+  <text x="282" y="402" class="m" style="fill:#1E4FB0">iphone 12 case</text>
+  <text x="56" y="436" class="mute">plural -s stripped: shoes → shoe, laces → lace</text>
+  <text x="56" y="456" class="mute">dl = 3, 4, 3    avgdl = 3.33    n = 3</text>
+
+  <!-- Example B: tf grid -->
+  <rect x="480" y="290" width="320" height="180" rx="8" fill="#FFFFFF" stroke="#D0D7DE"/>
+  <text x="496" y="314" class="b" style="font-size:13px">tf matrix (counts)</text>
+  <g>
+    <text x="557" y="340" class="cell" style="font-weight:700">nike</text>
+    <text x="612" y="340" class="cell" style="font-weight:700">running</text>
+    <text x="667" y="340" class="cell" style="font-weight:700">shoe</text>
+    <text x="722" y="340" class="cell" style="font-weight:700">case</text>
+    <text x="770" y="340" class="cell" style="fill:#57606A">…</text>
+    <text x="510" y="368" class="m" style="font-weight:700">p1</text>
+    <text x="510" y="396" class="m" style="font-weight:700">p2</text>
+    <text x="510" y="424" class="m" style="font-weight:700">p3</text>
+    <rect x="530" y="350" width="220" height="84" fill="none" stroke="#D0D7DE"/>
+    <line x1="530" y1="378" x2="750" y2="378" stroke="#EAEEF2"/>
+    <line x1="530" y1="406" x2="750" y2="406" stroke="#EAEEF2"/>
+    <line x1="585" y1="350" x2="585" y2="434" stroke="#EAEEF2"/>
+    <line x1="640" y1="350" x2="640" y2="434" stroke="#EAEEF2"/>
+    <line x1="695" y1="350" x2="695" y2="434" stroke="#EAEEF2"/>
+    <text x="557" y="368" class="cell">1</text><text x="612" y="368" class="cell">1</text><text x="667" y="368" class="cell">1</text><text x="722" y="368" class="cell" style="fill:#C0C6CC">·</text>
+    <text x="557" y="396" class="cell" style="fill:#C0C6CC">·</text><text x="612" y="396" class="cell">1</text><text x="667" y="396" class="cell">1</text><text x="722" y="396" class="cell" style="fill:#C0C6CC">·</text>
+    <text x="557" y="424" class="cell" style="fill:#C0C6CC">·</text><text x="612" y="424" class="cell" style="fill:#C0C6CC">·</text><text x="667" y="424" class="cell" style="fill:#C0C6CC">·</text><text x="722" y="424" class="cell">1</text>
+  </g>
+  <text x="496" y="456" class="mute">empty cells aren't stored (CSR sparse)</text>
+
+  <line x1="803" y1="392" x2="817" y2="392" class="arrow"/>
+
+  <!-- Example C: weight grid -->
+  <rect x="820" y="290" width="340" height="180" rx="8" fill="#FFFFFF" stroke="#D0D7DE"/>
+  <text x="836" y="314" class="b" style="font-size:13px">BM25 weights → .tocsc()</text>
+  <g>
+    <text x="897" y="340" class="cell" style="font-weight:700">nike</text>
+    <text x="952" y="340" class="cell" style="font-weight:700">running</text>
+    <text x="1007" y="340" class="cell" style="font-weight:700">shoe</text>
+    <text x="1062" y="340" class="cell" style="font-weight:700">case</text>
+    <text x="1110" y="340" class="cell" style="fill:#57606A">…</text>
+    <text x="850" y="368" class="m" style="font-weight:700">p1</text>
+    <text x="850" y="396" class="m" style="font-weight:700">p2</text>
+    <text x="850" y="424" class="m" style="font-weight:700">p3</text>
+    <rect x="870" y="350" width="220" height="84" fill="none" stroke="#D0D7DE"/>
+    <line x1="870" y1="378" x2="1090" y2="378" stroke="#EAEEF2"/>
+    <line x1="870" y1="406" x2="1090" y2="406" stroke="#EAEEF2"/>
+    <line x1="925" y1="350" x2="925" y2="434" stroke="#EAEEF2"/>
+    <line x1="980" y1="350" x2="980" y2="434" stroke="#EAEEF2"/>
+    <line x1="1035" y1="350" x2="1035" y2="434" stroke="#EAEEF2"/>
+    <text x="897" y="368" class="cell" style="fill:#1E4FB0;font-weight:700">1.02</text><text x="952" y="368" class="cell">0.49</text><text x="1007" y="368" class="cell">0.49</text><text x="1062" y="368" class="cell" style="fill:#C0C6CC">·</text>
+    <text x="897" y="396" class="cell" style="fill:#C0C6CC">·</text><text x="952" y="396" class="cell" style="fill:#B4530A;font-weight:700">0.43</text><text x="1007" y="396" class="cell" style="fill:#B4530A;font-weight:700">0.43</text><text x="1062" y="396" class="cell" style="fill:#C0C6CC">·</text>
+    <text x="897" y="424" class="cell" style="fill:#C0C6CC">·</text><text x="952" y="424" class="cell" style="fill:#C0C6CC">·</text><text x="1007" y="424" class="cell" style="fill:#C0C6CC">·</text><text x="1062" y="424" class="cell" style="fill:#1E4FB0;font-weight:700">1.02</text>
+  </g>
+  <text x="836" y="456" class="mute">real BM25 values for this tiny 3-product corpus</text>
+
+  <!-- Formula -->
+  <rect x="40" y="490" width="1120" height="135" rx="8" fill="#FFFFFF" stroke="#9DB8EC"/>
+  <text x="56" y="516" class="b">Per-cell BM25 weight: computed once, vectorized over every stored (product, word) cell</text>
+  <text x="56" y="548" class="m" style="font-size:15px">w = idf × tf·(K1+1) / ( tf + K1·(1 − B + B·dl/avgdl) )      idf = log(1 + (n − df + 0.5) / (df + 0.5))</text>
+  <text x="56" y="571" class="mute">K1 = 1.2, B = 0.75. The `rows` array (np.repeat over indptr) maps each stored cell back to its product so its dl can be looked up.</text>
+  <rect x="56" y="584" width="350" height="28" rx="14" fill="#EAF1FD"/>
+  <text x="70" y="603" class="t"><tspan font-weight="700" style="fill:#1E4FB0">idf:</tspan> rare words weigh more (nike 1.02 &gt; running 0.49)</text>
+  <rect x="416" y="584" width="350" height="28" rx="14" fill="#EAF1FD"/>
+  <text x="430" y="603" class="t"><tspan font-weight="700" style="fill:#1E4FB0">saturation (K1):</tspan> 5× "case" isn't 5× better</text>
+  <rect x="776" y="584" width="370" height="28" rx="14" fill="#FDF0E6"/>
+  <text x="790" y="603" class="t"><tspan font-weight="700" style="fill:#B4530A">length norm (B):</tspan> longer field, less per match: 0.43 &lt; 0.49</text>
+
+  <!-- ============ 2. QUERY ============ -->
+  <rect x="20" y="660" width="1160" height="375" rx="14" fill="#F1FAF4" stroke="#BFE3CB"/>
+  <text x="40" y="690" class="sec" style="fill:#1E7A46">② QUERY: search(query, k) → FieldBM25.field_scores() → rank()</text>
+
+  <rect x="40" y="760" width="170" height="90" rx="8" fill="#FFFFFF" stroke="#8FCBA6"/>
+  <text x="54" y="786" class="b">query</text>
+  <text x="54" y="812" class="m">"nike running</text>
+  <text x="54" y="830" class="m"> shoes"</text>
+
+  <rect x="235" y="760" width="150" height="90" rx="8" fill="#FFFFFF" stroke="#8FCBA6"/>
+  <text x="249" y="786" class="b">tokenize()</text>
+  <text x="249" y="806" class="m" style="fill:#1E4FB0">nike</text>
+  <text x="249" y="822" class="m" style="fill:#1E4FB0">running</text>
+  <text x="249" y="838" class="m" style="fill:#1E4FB0">shoe</text>
+
+  <line x1="212" y1="805" x2="232" y2="805" class="arrow"/>
+
+  <!-- lanes -->
+  <rect x="420" y="710" width="330" height="70" rx="8" fill="#FFFFFF" stroke="#3B6FD8" stroke-width="1.6"/>
+  <text x="434" y="732" class="b" style="font-size:13px"><tspan style="fill:#3B6FD8">title</tspan> index · FieldIndex.scores()</text>
+  <text x="434" y="752" class="m">w[:, cols].sum(axis=1)</text>
+  <text x="434" y="769" class="mute">→ 36,984 scores, one per product</text>
+
+  <rect x="420" y="790" width="330" height="70" rx="8" fill="#FFFFFF" stroke="#8A4FD3" stroke-width="1.6"/>
+  <text x="434" y="812" class="b" style="font-size:13px"><tspan style="fill:#8A4FD3">brand</tspan> index · FieldIndex.scores()</text>
+  <text x="434" y="832" class="m">w[:, cols].sum(axis=1)</text>
+  <text x="434" y="849" class="mute">→ 36,984 scores, one per product</text>
+
+  <rect x="420" y="870" width="330" height="70" rx="8" fill="#FFFFFF" stroke="#9AA0A6" stroke-width="1.6" stroke-dasharray="5 4"/>
+  <text x="434" y="892" class="b" style="font-size:13px"><tspan style="fill:#6E7781">bullets</tspan> index · FieldIndex.scores()</text>
+  <text x="434" y="912" class="m">w[:, cols].sum(axis=1)</text>
+  <text x="434" y="929" class="mute">→ computed, but weight 0 (tuned off, see ③)</text>
+
+  <line x1="387" y1="800" x2="417" y2="747" class="arrow"/>
+  <line x1="387" y1="805" x2="417" y2="825" class="arrow"/>
+  <line x1="387" y1="810" x2="417" y2="902" class="arrow"/>
+
+  <!-- weights -->
+  <rect x="770" y="727" width="70" height="36" rx="18" fill="#3B6FD8"/>
+  <text x="805" y="750" class="b" style="fill:#FFFFFF;text-anchor:middle">× 1.0</text>
+  <rect x="770" y="807" width="70" height="36" rx="18" fill="#8A4FD3"/>
+  <text x="805" y="830" class="b" style="fill:#FFFFFF;text-anchor:middle">× 0.25</text>
+  <rect x="770" y="887" width="70" height="36" rx="18" fill="#C9CED3"/>
+  <text x="805" y="910" class="b" style="fill:#FFFFFF;text-anchor:middle">× 0.0</text>
+  <line x1="752" y1="745" x2="767" y2="745" class="arrow"/>
+  <line x1="752" y1="825" x2="767" y2="825" class="arrow"/>
+  <line x1="752" y1="905" x2="767" y2="905" class="arrow"/>
+
+  <rect x="880" y="760" width="120" height="110" rx="8" fill="#FFFFFF" stroke="#8FCBA6"/>
+  <text x="940" y="796" class="b" style="font-size:22px;text-anchor:middle">Σ</text>
+  <text x="940" y="822" class="t" style="text-anchor:middle">weighted sum</text>
+  <text x="940" y="840" class="t" style="text-anchor:middle">= total score</text>
+  <text x="940" y="858" class="t" style="text-anchor:middle">per product</text>
+  <line x1="842" y1="745" x2="877" y2="800" class="arrow"/>
+  <line x1="842" y1="825" x2="877" y2="815" class="arrow"/>
+  <line x1="842" y1="905" x2="877" y2="832" class="arrow"/>
+
+  <rect x="1025" y="760" width="135" height="110" rx="8" fill="#FFFFFF" stroke="#8FCBA6"/>
+  <text x="1039" y="786" class="b">top k</text>
+  <text x="1039" y="808" class="t">argpartition</text>
+  <text x="1039" y="826" class="t">(unordered top k)</text>
+  <text x="1039" y="844" class="t">→ argsort those k</text>
+  <text x="1039" y="862" class="t">→ product_ids</text>
+  <line x1="1002" y1="815" x2="1022" y2="815" class="arrow"/>
+
+  <text x="40" y="975" class="t">• <tspan font-weight="700">cols</tspan> = vocab ids of query words that exist in this field. Unknown words are skipped; if none match, the field returns all zeros.</text>
+  <text x="40" y="997" class="t">• <tspan font-weight="700">~1 ms/query</tspan>: nothing BM25-related is recomputed. rank_bm25 would loop over all 36,984 products for every query word.</text>
+  <text x="40" y="1019" class="t">• search() uses the module-level WEIGHTS. rank() is split from field_scores() so tuning can reuse cached per-field scores.</text>
+
+  <!-- ============ 3. TUNE ============ -->
+  <rect x="20" y="1050" width="1160" height="425" rx="14" fill="#FFF8EC" stroke="#F0D7A8"/>
+  <text x="40" y="1080" class="sec" style="fill:#9A5B00">③ TUNE: python bm25.py → main()</text>
+
+  <g>
+    <rect x="40" y="1100" width="440" height="58" rx="8" fill="#FFFFFF" stroke="#E8C88A"/>
+    <circle cx="64" cy="1129" r="13" fill="#C77700"/><text x="64" y="1134" class="b" style="fill:#FFFFFF;text-anchor:middle;font-size:13px">1</text>
+    <text x="88" y="1124" class="b" style="font-size:13.5px">dev_test_split()</text>
+    <text x="88" y="1144" class="t">seeded shuffle of 300 queries → 150 dev / 150 test</text>
+
+    <rect x="40" y="1172" width="440" height="58" rx="8" fill="#FFFFFF" stroke="#E8C88A"/>
+    <circle cx="64" cy="1201" r="13" fill="#C77700"/><text x="64" y="1206" class="b" style="fill:#FFFFFF;text-anchor:middle;font-size:13px">2</text>
+    <text x="88" y="1196" class="b" style="font-size:13.5px">Baseline: equal weights 1 / 1 / 1 on dev</text>
+    <text x="88" y="1216" class="t">nDCG@10 0.415 · recall@100 0.761 → results.log</text>
+
+    <rect x="40" y="1244" width="440" height="58" rx="8" fill="#FFFFFF" stroke="#E8C88A"/>
+    <circle cx="64" cy="1273" r="13" fill="#C77700"/><text x="64" y="1278" class="b" style="fill:#FFFFFF;text-anchor:middle;font-size:13px">3</text>
+    <text x="88" y="1268" class="b" style="font-size:13.5px">tune(): cache field_scores per dev query</text>
+    <text x="88" y="1288" class="t">BM25 runs once per query; only the weights change in the loop</text>
+
+    <rect x="40" y="1316" width="440" height="58" rx="8" fill="#FFFFFF" stroke="#E8C88A"/>
+    <circle cx="64" cy="1345" r="13" fill="#C77700"/><text x="64" y="1350" class="b" style="fill:#FFFFFF;text-anchor:middle;font-size:13px">4</text>
+    <text x="88" y="1340" class="b" style="font-size:13.5px">Grid: title = 1.0, 6 brand × 5 bullets = 30</text>
+    <text x="88" y="1360" class="t">rank top 10 → mean nDCG@10 via eval._ndcg (no log spam)</text>
+
+    <rect x="40" y="1388" width="440" height="58" rx="8" fill="#FFFFFF" stroke="#C77700" stroke-width="1.6"/>
+    <circle cx="64" cy="1417" r="13" fill="#C77700"/><text x="64" y="1422" class="b" style="fill:#FFFFFF;text-anchor:middle;font-size:13px">5</text>
+    <text x="88" y="1412" class="b" style="font-size:13.5px">Best: title 1.0 · brand 0.25 · bullets 0.0</text>
+    <text x="88" y="1432" class="t">nDCG@10 dev 0.447 · <tspan font-weight="700">test 0.403</tspan> · test recall@100 0.747</text>
+  </g>
+
+  <!-- heatmap -->
+  <text x="540" y="1110" class="b" style="font-size:13.5px">Dev nDCG@10 for each weight combo (title fixed at 1.0)</text>
+  <text x="870" y="1132" class="mute" style="text-anchor:middle">bullets weight →</text>
+  <text x="600" y="1147" class="mute" style="text-anchor:end">brand ↓</text>
+  <g class="cell">
+    <text x="670" y="1147" class="cell" style="font-weight:700">0</text>
+    <text x="770" y="1147" class="cell" style="font-weight:700">0.1</text>
+    <text x="870" y="1147" class="cell" style="font-weight:700">0.25</text>
+    <text x="970" y="1147" class="cell" style="font-weight:700">0.5</text>
+    <text x="1070" y="1147" class="cell" style="font-weight:700">1.0</text>
+  </g>
+  <g style="font-size:12px">
+    <text x="606" y="1177" class="m" style="text-anchor:end;font-weight:700">0</text>
+    <text x="606" y="1217" class="m" style="text-anchor:end;font-weight:700">0.25</text>
+    <text x="606" y="1257" class="m" style="text-anchor:end;font-weight:700">0.5</text>
+    <text x="606" y="1297" class="m" style="text-anchor:end;font-weight:700">1.0</text>
+    <text x="606" y="1337" class="m" style="text-anchor:end;font-weight:700">2.0</text>
+    <text x="606" y="1377" class="m" style="text-anchor:end;font-weight:700">4.0</text>
+  </g>
+  <!-- buckets: A >=.44 #1B6E5A, B .41-.44 #3E9479, C .38-.41 #7DBBA3, D .30-.38 #B9DCCD, E <.30 #E6F2EC -->
+  <g stroke="#FFF8EC" stroke-width="2">
+    <rect x="620" y="1153" width="100" height="40" fill="#1B6E5A"/><rect x="720" y="1153" width="100" height="40" fill="#1B6E5A"/><rect x="820" y="1153" width="100" height="40" fill="#1B6E5A"/><rect x="920" y="1153" width="100" height="40" fill="#3E9479"/><rect x="1020" y="1153" width="100" height="40" fill="#7DBBA3"/>
+    <rect x="620" y="1193" width="100" height="40" fill="#1B6E5A"/><rect x="720" y="1193" width="100" height="40" fill="#1B6E5A"/><rect x="820" y="1193" width="100" height="40" fill="#1B6E5A"/><rect x="920" y="1193" width="100" height="40" fill="#3E9479"/><rect x="1020" y="1193" width="100" height="40" fill="#3E9479"/>
+    <rect x="620" y="1233" width="100" height="40" fill="#1B6E5A"/><rect x="720" y="1233" width="100" height="40" fill="#3E9479"/><rect x="820" y="1233" width="100" height="40" fill="#1B6E5A"/><rect x="920" y="1233" width="100" height="40" fill="#3E9479"/><rect x="1020" y="1233" width="100" height="40" fill="#3E9479"/>
+    <rect x="620" y="1273" width="100" height="40" fill="#3E9479"/><rect x="720" y="1273" width="100" height="40" fill="#3E9479"/><rect x="820" y="1273" width="100" height="40" fill="#3E9479"/><rect x="920" y="1273" width="100" height="40" fill="#3E9479"/><rect x="1020" y="1273" width="100" height="40" fill="#3E9479"/>
+    <rect x="620" y="1313" width="100" height="40" fill="#B9DCCD"/><rect x="720" y="1313" width="100" height="40" fill="#B9DCCD"/><rect x="820" y="1313" width="100" height="40" fill="#B9DCCD"/><rect x="920" y="1313" width="100" height="40" fill="#B9DCCD"/><rect x="1020" y="1313" width="100" height="40" fill="#B9DCCD"/>
+    <rect x="620" y="1353" width="100" height="40" fill="#E6F2EC"/><rect x="720" y="1353" width="100" height="40" fill="#E6F2EC"/><rect x="820" y="1353" width="100" height="40" fill="#E6F2EC"/><rect x="920" y="1353" width="100" height="40" fill="#E6F2EC"/><rect x="1020" y="1353" width="100" height="40" fill="#E6F2EC"/>
+  </g>
+  <rect x="621" y="1194" width="98" height="38" fill="none" stroke="#C77700" stroke-width="3"/>
+  <g class="cell" style="font-size:13px">
+    <text x="670" y="1178" class="cell" style="fill:#FFFFFF">0.4455</text><text x="770" y="1178" class="cell" style="fill:#FFFFFF">0.4435</text><text x="870" y="1178" class="cell" style="fill:#FFFFFF">0.4415</text><text x="970" y="1178" class="cell" style="fill:#FFFFFF">0.4295</text><text x="1070" y="1178" class="cell">0.4092</text>
+    <text x="670" y="1218" class="cell" style="fill:#FFFFFF;font-weight:700">0.4468 ★</text><text x="770" y="1218" class="cell" style="fill:#FFFFFF">0.4410</text><text x="870" y="1218" class="cell" style="fill:#FFFFFF">0.4423</text><text x="970" y="1218" class="cell" style="fill:#FFFFFF">0.4312</text><text x="1070" y="1218" class="cell" style="fill:#FFFFFF">0.4115</text>
+    <text x="670" y="1258" class="cell" style="fill:#FFFFFF">0.4456</text><text x="770" y="1258" class="cell" style="fill:#FFFFFF">0.4387</text><text x="870" y="1258" class="cell" style="fill:#FFFFFF">0.4414</text><text x="970" y="1258" class="cell" style="fill:#FFFFFF">0.4283</text><text x="1070" y="1258" class="cell" style="fill:#FFFFFF">0.4137</text>
+    <text x="670" y="1298" class="cell" style="fill:#FFFFFF">0.4150</text><text x="770" y="1298" class="cell" style="fill:#FFFFFF">0.4189</text><text x="870" y="1298" class="cell" style="fill:#FFFFFF">0.4287</text><text x="970" y="1298" class="cell" style="fill:#FFFFFF">0.4194</text><text x="1070" y="1298" class="cell" style="fill:#FFFFFF">0.4146</text>
+    <text x="670" y="1338" class="cell">0.3097</text><text x="770" y="1338" class="cell">0.3201</text><text x="870" y="1338" class="cell">0.3343</text><text x="970" y="1338" class="cell">0.3533</text><text x="1070" y="1338" class="cell">0.3794</text>
+    <text x="670" y="1378" class="cell">0.1748</text><text x="770" y="1378" class="cell">0.1843</text><text x="870" y="1378" class="cell">0.1945</text><text x="970" y="1378" class="cell">0.2125</text><text x="1070" y="1378" class="cell">0.2518</text>
+  </g>
+  <text x="540" y="1420" class="t">Flat ridge at brand ≤ 0.5, bullets 0 (0.4455 – 0.4468): differences are noise on 150 queries.</text>
+  <text x="540" y="1440" class="t">Bullets add matches without precision. Heavy brand double-counts brand words already in titles.</text>
+</svg>

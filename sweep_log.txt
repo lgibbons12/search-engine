@@ -1,0 +1,42 @@
+[     2s] pipeline loaded
+[    32s] baseline (current defaults) dev nDCG@10=0.5720 recall@100=0.8351
+[    32s] == 1a BM25 k1/b: 9 configs ==
+[    35s]   new best recall@50=0.7611 recall@100=0.8306  [k1=0.9 b=0.5]
+[    38s]   new best recall@50=0.7619 recall@100=0.8357  [k1=0.9]
+[    57s] -> 1a BM25 k1/b winner recall@50=0.7619 recall@100=0.8357  [k1=0.9]
+[    57s] == 1b fields x fusion: 450 configs ==
+[    60s]   new best recall@50=0.7513 recall@100=0.8244  [w_brand=0.0 k1=0.9 w_dense=0.5 rrf_k=1]
+[    60s]   new best recall@50=0.7542 recall@100=0.8254  [w_brand=0.0 k1=0.9 w_dense=0.5 rrf_k=1 depth=200]
+[    60s]   new best recall@50=0.7560 recall@100=0.8341  [w_brand=0.0 k1=0.9 w_dense=0.75 rrf_k=1]
+[    60s]   new best recall@50=0.7581 recall@100=0.8316  [w_brand=0.0 k1=0.9 w_dense=0.75 rrf_k=1 depth=200]
+[    61s]   new best recall@50=0.7582 recall@100=0.8366  [w_brand=0.0 k1=0.9 rrf_k=1]
+[    61s]   new best recall@50=0.7614 recall@100=0.8355  [w_brand=0.0 k1=0.9 rrf_k=1 depth=200]
+[    61s]   new best recall@50=0.7619 recall@100=0.8355  [w_brand=0.0 k1=0.9 rrf_k=5 depth=200]
+[    61s]   new best recall@50=0.7642 recall@100=0.8347  [w_brand=0.0 k1=0.9 rrf_k=30 depth=200]
+[    61s]   new best recall@50=0.7658 recall@100=0.8344  [w_brand=0.0 k1=0.9 rrf_k=60 depth=200]
+[    63s]   new best recall@50=0.7676 recall@100=0.8399  [w_brand=0.0 w_bullets=0.1 k1=0.9 rrf_k=60 depth=200]
+[    68s]   new best recall@50=0.7685 recall@100=0.8360  [k1=0.9 rrf_k=60 depth=200]
+[    71s]   new best recall@50=0.7696 recall@100=0.8403  [w_bullets=0.1 k1=0.9 rrf_k=60 depth=200]
+[    75s]   new best recall@50=0.7696 recall@100=0.8352  [w_brand=0.5 k1=0.9 rrf_k=60 depth=200]
+[    81s] -> 1b fields x fusion winner recall@50=0.7696 recall@100=0.8352  [w_brand=0.5 k1=0.9 rrf_k=60 depth=200]
+[    81s] == 2a CE text x w_ce: 8 configs ==
+[    85s]   new best nDCG@10=0.5515 recall@100=0.8352  [w_brand=0.5 k1=0.9 rrf_k=60 depth=200 w_ce=2.0 llm=off]
+[    85s]   new best nDCG@10=0.5634 recall@100=0.8352  [w_brand=0.5 k1=0.9 rrf_k=60 depth=200 w_ce=4.0 llm=off]
+[    85s]   new best nDCG@10=0.5649 recall@100=0.8352  [w_brand=0.5 k1=0.9 rrf_k=60 depth=200 w_ce=8.0 llm=off]
+[   110s] -> 2a CE text x w_ce winner nDCG@10=0.5649 recall@100=0.8352  [w_brand=0.5 k1=0.9 rrf_k=60 depth=200 w_ce=8.0 llm=off]
+[   110s] == 2b rerank depth: 4 configs ==
+[   110s]   new best nDCG@10=0.5567 recall@100=0.8352  [w_brand=0.5 k1=0.9 rrf_k=60 depth=200 rerank_depth=30 w_ce=8.0 llm=off]
+[   110s]   new best nDCG@10=0.5649 recall@100=0.8352  [w_brand=0.5 k1=0.9 rrf_k=60 depth=200 w_ce=8.0 llm=off]
+[   131s] -> 2b rerank depth winner nDCG@10=0.5649 recall@100=0.8352  [w_brand=0.5 k1=0.9 rrf_k=60 depth=200 w_ce=8.0 llm=off]
+[   131s] == 3 LLM mode/weights: 82 configs ==
+[   131s]   new best nDCG@10=0.5649 recall@100=0.8352  [w_brand=0.5 k1=0.9 rrf_k=60 depth=200 w_ce=8.0 llm=off]
+[   133s]   new best nDCG@10=0.5702 recall@100=0.8352  [w_brand=0.5 k1=0.9 rrf_k=60 depth=200 w_ce=8.0 b_brand=0.0 b_color=0.0 p_excl=2.0]
+[   133s]   new best nDCG@10=0.5705 recall@100=0.8352  [w_brand=0.5 k1=0.9 rrf_k=60 depth=200 w_ce=8.0 b_brand=0.0 p_excl=2.0]
+[   134s]   new best nDCG@10=0.5716 recall@100=0.8352  [w_brand=0.5 k1=0.9 rrf_k=60 depth=200 w_ce=8.0 b_brand=0.5 b_color=0.0 p_excl=2.0]
+[   134s]   new best nDCG@10=0.5719 recall@100=0.8352  [w_brand=0.5 k1=0.9 rrf_k=60 depth=200 w_ce=8.0 b_brand=0.5 p_excl=2.0]
+[   135s]   new best nDCG@10=0.5722 recall@100=0.8352  [w_brand=0.5 k1=0.9 rrf_k=60 depth=200 w_ce=8.0 b_color=0.0 p_excl=2.0]
+[   136s]   new best nDCG@10=0.5725 recall@100=0.8352  [w_brand=0.5 k1=0.9 rrf_k=60 depth=200 w_ce=8.0 p_excl=2.0]
+[   137s] -> 3 LLM mode/weights winner nDCG@10=0.5725 recall@100=0.8352  [w_brand=0.5 k1=0.9 rrf_k=60 depth=200 w_ce=8.0 p_excl=2.0]
+[   137s] dev: baseline 0.5720 -> sweep winner 0.5725 nDCG@10
+[   137s] winner saved to sweep_best.json; reproduce with: python cli.py --split test --w-brand 0.5 --k1 0.9 --rrf-k 60 --depth 200 --w-ce 8.0 --p-excl 2.0
+[   170s] TEST nDCG@10=0.4939 recall@100=0.7982 (previous best test 0.4912)

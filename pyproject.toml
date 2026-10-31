@@ -1,0 +1,15 @@
+[project]
+name = "search-build"
+version = "0.1.0"
+description = "Product search: field-weighted BM25 + dense RRF + cross-encoder rerank + soft LLM signals"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "anthropic>=2.3.0",
+    "datasets>=5.1.0",
+    "pandas>=3.1.0",
+    "pyarrow>=26.0.0",
+    "python-dotenv>=1.2.4",
+    "rank-bm25>=0.2.2",
+    "sentence-transformers>=6.2.0",
+]
